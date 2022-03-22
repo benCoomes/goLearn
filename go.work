@@ -1,0 +1,9 @@
+go 1.18
+
+use (
+	./000_helloWorld
+	./001_modulesAndTests/greetings
+	./001_modulesAndTests/hello
+	./002_restApi/recordings-api
+	./003_generics
+)
