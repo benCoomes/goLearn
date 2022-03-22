@@ -6,4 +6,5 @@ use (
 	./001_modulesAndTests/hello
 	./002_restApi/recordings-api
 	./003_generics
+	./004_fuzzing
 )
