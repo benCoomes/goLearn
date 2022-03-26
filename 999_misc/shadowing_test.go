@@ -3,54 +3,44 @@ package main
 import "testing"
 
 func TestShadowing_DeclareAndAssign_InsideBlock(t *testing.T) {
-	myMap := make(map[string]string)
-	myMap["key"] = "mapValue"
-
-	var value string
-	value = "initialValue"
+	value := "initialValue"
 
 	{
-		t.Logf("inside block, value is %v before lookup", value)
-		value, found := myMap["key"] // declare and assign (need new var 'found' to use :=)
-		t.Logf("inside block, value is %v and found is %v", value, found)
+		t.Logf("inside block, value is %v before", value)                                                     // here, value is the variable outside the block.
+		value, someOther := "insideBlock", "foo"                                                              // declare and assign (need new var to use :=)
+		t.Logf("inside block, value is %v after. (avoid 'unused' error for someOther: %v)", value, someOther) // now, value is the new variable created inside this block!
 	}
 
-	if value != "mapValue" { // This will be true. Fail on purpose so that logs always show.
-		// value inside of the block is different than value outside the block!
-		t.Errorf("Expected for value to be 'mapValue' but it is %v", value)
+	if value != "initialValue" {
+		// since new value var was created inside the block, outer value var is not changed
+		t.Errorf("Expected for value to be 'initialValue' but it is %v", value)
 	}
 }
 
 func TestShadowing_DeclareAndAssign_NoBlock(t *testing.T) {
-	myMap := make(map[string]string)
-	myMap["key"] = "mapValue"
-
-	var value string
-	value = "initialValue"
+	value := "initialValue"
 
 	//{ no block in this test
-	value, found := myMap["key"] // declare and assign (need new var 'found' to use :=)
-	t.Logf("no block, value is %v and found is %v right after lookup", value, found)
+	t.Logf("no block, value is %v before", value)
+	value, someOther := "newValue", "foo" // declare and assign (need new var to use :=)
+	t.Logf("no block, value is %v after. (avoid 'unused' error for someOther: %v)", value, someOther)
 	//}
 
-	if value != "mapValue" {
-		t.Errorf("Expected for value to be 'mapValue' but it is %v", value)
+	if value != "newValue" {
+		t.Errorf("Expected for value to be 'newValue' but it is %v", value)
 	}
 }
 
 func TestShadowing_AssignOnly_InBlock(t *testing.T) {
-	myMap := make(map[string]string)
-	myMap["key"] = "mapValue"
-
-	var value string
-	value = "initialValue"
+	value := "initialValue"
 
 	{
-		value = myMap["key"] // assignment only, here
-		t.Logf("inside block, value is %v", value)
+		t.Logf("inside block, value is %v before", value)
+		value = "newValue" // assignment only, here
+		t.Logf("inside block, value is %v after", value)
 	}
 
-	if value != "mapValue" {
-		t.Errorf("Expected for value to be 'mapValue' but it is %v", value)
+	if value != "newValue" {
+		t.Errorf("Expected for value to be 'newValue' but it is %v", value)
 	}
 }
