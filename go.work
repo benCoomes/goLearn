@@ -7,4 +7,5 @@ use (
 	./002_restApi/recordings-api
 	./003_generics
 	./004_fuzzing
+	./999_misc
 )
