@@ -34,9 +34,12 @@ func main() {
 
 	fmt.Printf("%v, %v\n", film.Title, film.Url)
 
-	// The functions below do the same thing in different ways
-	//WaitGroupAndMutex(film)
-	Channel(film)
+	// This is the naive way to get all the film characters:
+	OneByOne(film)
+
+	// These methods will get the film characters concurrently:
+	WaitGroupAndMutex(film)
+	// Channel(film)
 }
 
 func WaitGroupAndMutex(film Film) {
@@ -68,7 +71,7 @@ func FetchAndPrint(url string, wg *sync.WaitGroup, mutex *sync.Mutex) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	count += 1
-	fmt.Printf("%v\t[%v]\t%v:\t%v...\n", count, time.Now().Format("2006-01-02T15:04:05.999"), url, strbody[:40])
+	fmt.Printf("%v\t[%v]\t%v\t%v...\n", count, time.Now().Format("2006-01-02T15:04:05.999"), url, strbody[:40])
 }
 
 func Channel(film Film) {
@@ -84,12 +87,9 @@ func Channel(film Film) {
 		if printstr == "" {
 			printstr = out.Error
 		}
-		printlen := len(printstr)
-		if printlen > 40 {
-			printlen = 40
-		}
+
 		count += 1
-		fmt.Printf("%v\t[%v]\t%v:\t%v...\n", count, time.Now().Format("2006-01-02T15:04:05.999"), out.Url, printstr[:printlen])
+		fmt.Printf("%v\t[%v]\t%v\t%v...\n", count, time.Now().Format("2006-01-02T15:04:05.900"), out.Url, printstr[:40])
 	}
 }
 
@@ -109,4 +109,22 @@ func Fetch(url string, ch chan Result) {
 
 	body, err := io.ReadAll(resp.Body)
 	ch <- Result{Value: string(body), Url: url}
+}
+
+func OneByOne(film Film) {
+	for i, url := range film.Characters {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Printf("\t%v\n", err)
+			return
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("\t%v\n", err)
+			return
+		}
+
+		fmt.Printf("%v\t[%v]\t%v\t%v...\n", i, time.Now().Format("2006-01-02T15:04:05.999"), url, string(body)[:40])
+	}
 }
